@@ -1,4 +1,5 @@
 import random
+import time
 
 
 def square(pos):
@@ -35,9 +36,9 @@ def fits(i, cell):
         return True
 
 
-def select_cells(level):
+def select_cells(l):
     pp = 0
-    while pp < level:
+    while pp < l:
         x = random.randint(0, 8)
         y = random.randint(0, 8)
         if (x, y) not in selected_cells:
@@ -46,7 +47,12 @@ def select_cells(level):
 
 
 def fill_cells():
+    s = time.time()
     while len(selected_cells) > 0:
+        e = time.time()
+        if e - s > 0.1:
+            start(level)
+            break
         pos = selected_cells[0]
         val = random.randint(1, 9)
         if fits(val, pos):
@@ -55,6 +61,25 @@ def fill_cells():
             r_board[pos[1]].append(val)
             c_board[pos[0]].append(val)
             s_board[square(pos)].append(val)
+
+
+def start(l):
+    global board, r_board, c_board, s_board, selected_cells
+    board = [[0, 0, 0, 0, 0, 0, 0, 0, 0],
+             [0, 0, 0, 0, 0, 0, 0, 0, 0],
+             [0, 0, 0, 0, 0, 0, 0, 0, 0],
+             [0, 0, 0, 0, 0, 0, 0, 0, 0],
+             [0, 0, 0, 0, 0, 0, 0, 0, 0],
+             [0, 0, 0, 0, 0, 0, 0, 0, 0],
+             [0, 0, 0, 0, 0, 0, 0, 0, 0],
+             [0, 0, 0, 0, 0, 0, 0, 0, 0],
+             [0, 0, 0, 0, 0, 0, 0, 0, 0]]
+    r_board = [[], [], [], [], [], [], [], [], []]
+    c_board = [[], [], [], [], [], [], [], [], []]
+    s_board = [[], [], [], [], [], [], [], [], []]
+    selected_cells = []
+    select_cells(l)
+    fill_cells()
 
 
 board = [[0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -71,9 +96,8 @@ c_board = [[], [], [], [], [], [], [], [], []]
 s_board = [[], [], [], [], [], [], [], [], []]
 selected_cells = []
 
-level = int(input("Enter number of cells you want to be already filled: "))
-select_cells(level)
-fill_cells()
+level = int(input("Enter number of cells you want to be already filled: "))  # Here max value of level should be 40
+start(level)
 for i in board:
     print(i)
 print()
