@@ -16,9 +16,10 @@ BLANK_INT_BOARD = [[0, 0, 0, 0, 0, 0, 0, 0, 0],
 BACKGROUND_COLOR = (64, 64, 64)
 CELL_COLOR = "#c0e8ec"
 TEXT_COLOR = (64, 64, 64)
-CLEAR = False
 NUM_FONT = pygame.font.Font(None, 60)
 TEXT_FONT = pygame.font.Font(None, 50)
+CLEAR = False
+SOLVE = False
 
 
 class Cell(pygame.sprite.Sprite):
@@ -229,7 +230,7 @@ class Clear(pygame.sprite.Sprite):
         self.x = 137
         self.y = 598
         self.h = 60
-        self.ln = 155
+        self.ln = 157
         self.rect = pygame.rect.Rect(self.x, self.y, self.ln, self.h)
         self.text_surf = TEXT_FONT.render("CLEAR", True, TEXT_COLOR)
         self.text_rect = self.text_surf.get_rect()
@@ -245,6 +246,28 @@ class Clear(pygame.sprite.Sprite):
             CLEAR = True
 
 
+class Solve(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+        self.x = 301
+        self.y = 598
+        self.h = 60
+        self.ln = 157
+        self.rect = pygame.rect.Rect(self.x, self.y, self.ln, self.h)
+        self.text_surf = TEXT_FONT.render("SOLVE", True, TEXT_COLOR)
+        self.text_rect = self.text_surf.get_rect()
+        self.text_rect.center = self.rect.center
+
+    def update(self):
+        global SOLVE
+        pygame.draw.rect(screen, CELL_COLOR, self.rect, border_radius=3)
+        screen.blit(self.text_surf, self.text_rect)
+        mouse = pygame.mouse.get_pressed()
+        mouse_pos = pygame.mouse.get_pos()
+        if mouse[0] and self.rect.collidepoint(mouse_pos):
+            SOLVE = True
+
+
 screen = pygame.display.set_mode((599, 665))
 screen.fill(BACKGROUND_COLOR)
 pygame.display.set_caption("Sudoku")
@@ -254,6 +277,7 @@ clock = pygame.time.Clock()
 q_board = Question().question(35)
 board = Board(q_board)
 clear = Clear()
+solve = Solve()
 
 while True:
     for event in pygame.event.get():
@@ -262,6 +286,7 @@ while True:
             exit()
 
     clear.update()
+    solve.update()
     board.update()
 
     pygame.display.update()
