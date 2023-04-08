@@ -4,6 +4,8 @@ pygame.init()
 
 screen.fill(BACKGROUND_COLOR)
 pygame.display.set_caption("Sudoku")
+icon_surf = pygame.image.load("images/sudoku_icon.png")
+pygame.display.set_icon(icon_surf)
 
 clock = pygame.time.Clock()
 
