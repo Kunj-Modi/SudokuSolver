@@ -19,12 +19,13 @@ pygame.init()
 
 
 class Cell(pygame.sprite.Sprite):
-    def __init__(self, row, column, value=None):
+    def __init__(self, row, column, value=None, mutability=True):
         super().__init__()
         self.r = row
         self.c = column
         self.s = self.square()
         self.val = value
+        self.mutable = mutability
 
         self.x = column * 60 + (column + 1) * 5 + ((column // 3) + 1) * (7 - 5)
         self.y = row * 60 + (row + 1) * 5 + ((row // 3) + 1) * (7 - 5)
@@ -58,6 +59,31 @@ class Cell(pygame.sprite.Sprite):
 
     def update(self):
         pygame.draw.rect(screen, CELL_COLOR, self.rect, border_radius=3)
+        if self.mutable:
+            keys = pygame.key.get_pressed()
+            mouse = pygame.mouse.get_pressed()
+            mouse_pos = pygame.mouse.get_pos()
+            if mouse[0] and self.rect.collidepoint(mouse_pos):
+                if keys[pygame.K_0]:
+                    self.val = None
+                elif keys[pygame.K_1]:
+                    self.val = 1
+                elif keys[pygame.K_2]:
+                    self.val = 2
+                elif keys[pygame.K_3]:
+                    self.val = 3
+                elif keys[pygame.K_4]:
+                    self.val = 4
+                elif keys[pygame.K_5]:
+                    self.val = 5
+                elif keys[pygame.K_6]:
+                    self.val = 6
+                elif keys[pygame.K_7]:
+                    self.val = 7
+                elif keys[pygame.K_8]:
+                    self.val = 8
+                elif keys[pygame.K_9]:
+                    self.val = 9
         if self.val:
             score_surface = text_font.render(f"{self.val}", True, TEXT_COLOR)
             score_rect = score_surface.get_rect()
@@ -79,7 +105,7 @@ class Board(pygame.sprite.Sprite):
         for r in range(9):
             for c in range(9):
                 if self.int_board[r][c]:
-                    cell = Cell(r, c, self.int_board[r][c])
+                    cell = Cell(row=r, column=c, value=self.int_board[r][c], mutability=False)
                     self.board[r].append(cell)
                     self.rows[c].append(cell)
                     self.columns[r].append(cell)
@@ -146,9 +172,9 @@ class Question:
             else:
                 return True
 
-        def select_cells(l):
+        def select_cells(lev):
             pp = 0
-            while pp < l:
+            while pp < lev:
                 x = random.randint(0, 8)
                 y = random.randint(0, 8)
                 if (x, y) not in self.selected_cells:
@@ -171,7 +197,7 @@ class Question:
                     self.c_board[pos[0]].append(val)
                     self.s_board[square(pos)].append(val)
 
-        def start(l):
+        def start(lev):
             self.board = [[0, 0, 0, 0, 0, 0, 0, 0, 0],
                           [0, 0, 0, 0, 0, 0, 0, 0, 0],
                           [0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -185,7 +211,7 @@ class Question:
             self.c_board = [[], [], [], [], [], [], [], [], []]
             self.s_board = [[], [], [], [], [], [], [], [], []]
             self.selected_cells = []
-            select_cells(l)
+            select_cells(lev)
             fill_cells()
 
         start(level)
