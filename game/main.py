@@ -2,6 +2,8 @@ import pygame
 import random
 import time
 
+pygame.init()
+
 BLANK_INT_BOARD = [[0, 0, 0, 0, 0, 0, 0, 0, 0],
                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -14,8 +16,9 @@ BLANK_INT_BOARD = [[0, 0, 0, 0, 0, 0, 0, 0, 0],
 BACKGROUND_COLOR = (64, 64, 64)
 CELL_COLOR = "#c0e8ec"
 TEXT_COLOR = (64, 64, 64)
-
-pygame.init()
+CLEAR = False
+NUM_FONT = pygame.font.Font(None, 60)
+TEXT_FONT = pygame.font.Font(None, 50)
 
 
 class Cell(pygame.sprite.Sprite):
@@ -63,8 +66,8 @@ class Cell(pygame.sprite.Sprite):
             keys = pygame.key.get_pressed()
             mouse = pygame.mouse.get_pressed()
             mouse_pos = pygame.mouse.get_pos()
-            if mouse[0] and self.rect.collidepoint(mouse_pos):
-                if keys[pygame.K_0]:
+            if CLEAR or (mouse[0] and self.rect.collidepoint(mouse_pos)):
+                if keys[pygame.K_0] or CLEAR:
                     self.val = None
                 elif keys[pygame.K_1]:
                     self.val = 1
@@ -85,10 +88,10 @@ class Cell(pygame.sprite.Sprite):
                 elif keys[pygame.K_9]:
                     self.val = 9
         if self.val:
-            score_surface = text_font.render(f"{self.val}", True, TEXT_COLOR)
-            score_rect = score_surface.get_rect()
-            score_rect.center = self.rect.center
-            screen.blit(score_surface, score_rect)
+            val_surface = NUM_FONT.render(f"{self.val}", True, TEXT_COLOR)
+            val_rect = val_surface.get_rect()
+            val_rect.center = self.rect.center
+            screen.blit(val_surface, val_rect)
 
 
 class Board(pygame.sprite.Sprite):
@@ -118,9 +121,11 @@ class Board(pygame.sprite.Sprite):
                     self.squares[cell.s].append(cell)
 
     def update(self):
+        global CLEAR
         for r in range(9):
             for c in range(9):
                 self.board[r][c].update()
+        CLEAR = False
 
 
 class Question:
@@ -218,16 +223,37 @@ class Question:
         return self.board
 
 
-screen = pygame.display.set_mode((599, 599))
+class Clear(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+        self.x = 137
+        self.y = 598
+        self.h = 60
+        self.ln = 155
+        self.rect = pygame.rect.Rect(self.x, self.y, self.ln, self.h)
+        self.text_surf = TEXT_FONT.render("CLEAR", True, TEXT_COLOR)
+        self.text_rect = self.text_surf.get_rect()
+        self.text_rect.center = self.rect.center
+
+    def update(self):
+        global CLEAR
+        pygame.draw.rect(screen, CELL_COLOR, self.rect, border_radius=3)
+        screen.blit(self.text_surf, self.text_rect)
+        mouse = pygame.mouse.get_pressed()
+        mouse_pos = pygame.mouse.get_pos()
+        if mouse[0] and self.rect.collidepoint(mouse_pos):
+            CLEAR = True
+
+
+screen = pygame.display.set_mode((599, 665))
 screen.fill(BACKGROUND_COLOR)
 pygame.display.set_caption("Sudoku")
-
-text_font = pygame.font.Font(None, 75)
 
 clock = pygame.time.Clock()
 
 q_board = Question().question(35)
 board = Board(q_board)
+clear = Clear()
 
 while True:
     for event in pygame.event.get():
@@ -235,6 +261,7 @@ while True:
             pygame.quit()
             exit()
 
+    clear.update()
     board.update()
 
     pygame.display.update()
