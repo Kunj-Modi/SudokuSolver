@@ -42,7 +42,7 @@ class Cell(pygame.sprite.Sprite):
                 return 8
 
     def get_cords(self):
-        return self.r, self.c, self.s
+        return self.r, self.c
 
     def update(self):
         pygame.draw.rect(screen, CELL_COLOR, self.rect, border_radius=3)
@@ -434,7 +434,7 @@ class Solve(pygame.sprite.Sprite):
         self.x = 301
         self.y = 598
         self.h = 60
-        self.ln = 157
+        self.ln = 159
         self.rect = pygame.rect.Rect(self.x, self.y, self.ln, self.h)
         self.text_surf = TEXT_FONT.render("SOLVE", True, TEXT_COLOR)
         self.text_rect = self.text_surf.get_rect()
@@ -448,3 +448,47 @@ class Solve(pygame.sprite.Sprite):
         mouse_pos = pygame.mouse.get_pos()
         if mouse[0] and self.rect.collidepoint(mouse_pos):
             SOLVE = True
+
+
+class UndoButton(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+        self.x = 7
+        self.y = 598
+        self.h = 60
+        self.ln = 123
+        self.rect = pygame.rect.Rect(self.x, self.y, self.ln, self.h)
+        self.text_surf = TEXT_FONT.render("<", True, TEXT_COLOR)
+        self.text_rect = self.text_surf.get_rect()
+        self.text_rect.center = self.rect.center
+
+    def update(self):
+        global UNDO_V
+        pygame.draw.rect(screen, CELL_COLOR, self.rect, border_radius=3)
+        screen.blit(self.text_surf, self.text_rect)
+        mouse = pygame.mouse.get_pressed()
+        mouse_pos = pygame.mouse.get_pos()
+        if mouse[0] and self.rect.collidepoint(mouse_pos):
+            UNDO_V = True
+
+
+class RedoButton(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+        self.x = 467
+        self.y = 598
+        self.h = 60
+        self.ln = 123
+        self.rect = pygame.rect.Rect(self.x, self.y, self.ln, self.h)
+        self.text_surf = TEXT_FONT.render(">", True, TEXT_COLOR)
+        self.text_rect = self.text_surf.get_rect()
+        self.text_rect.center = self.rect.center
+
+    def update(self):
+        global REDO_V
+        pygame.draw.rect(screen, CELL_COLOR, self.rect, border_radius=3)
+        screen.blit(self.text_surf, self.text_rect)
+        mouse = pygame.mouse.get_pressed()
+        mouse_pos = pygame.mouse.get_pos()
+        if mouse[0] and self.rect.collidepoint(mouse_pos):
+            REDO_V = True

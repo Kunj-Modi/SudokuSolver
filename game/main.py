@@ -13,6 +13,8 @@ q_board = Question().question(35)
 board = Board(q_board)
 clear = Clear()
 solve = Solve()
+undo = UndoButton()
+redo = RedoButton()
 
 while True:
     for event in pygame.event.get():
@@ -22,6 +24,8 @@ while True:
 
     clear.update()
     solve.update()
+    undo.update()
+    redo.update()
     board.update()
 
     pygame.display.update()
