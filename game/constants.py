@@ -11,6 +11,7 @@ BLANK_INT_BOARD = [[0, 0, 0, 0, 0, 0, 0, 0, 0],
                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
                    [0, 0, 0, 0, 0, 0, 0, 0, 0]]
+FINAL_BOARD = []
 BACKGROUND_COLOR = (64, 64, 64)
 CELL_COLOR = "#c0e8ec"
 TEXT_COLOR = (64, 64, 64)

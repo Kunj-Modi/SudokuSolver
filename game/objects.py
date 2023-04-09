@@ -71,6 +71,8 @@ class Cell(pygame.sprite.Sprite):
                     self.val = 8
                 elif keys[pygame.K_9]:
                     self.val = 9
+        if SOLVE:
+            self.val = FINAL_BOARD[self.r][self.c]
         if self.val:
             val_surface = NUM_FONT.render(f"{self.val}", True, TEXT_COLOR)
             val_rect = val_surface.get_rect()
@@ -161,22 +163,18 @@ class Question:
             else:
                 return True
 
-        def select_cells(lev):
+        def select_random_cells():
             pp = 0
-            while pp < lev:
+            self.selected_cells.append((0, 0))
+            while pp < 17:
                 x = random.randint(0, 8)
                 y = random.randint(0, 8)
                 if (x, y) not in self.selected_cells:
                     self.selected_cells.append((x, y))
                     pp += 1
 
-        def fill_cells():
-            s = time.time()
+        def fill_random_cells():
             while len(self.selected_cells) > 0:
-                e = time.time()
-                if e - s > 0.1:
-                    start(level)
-                    break
                 pos = self.selected_cells[0]
                 val = random.randint(1, 9)
                 if fits(val, pos):
@@ -185,8 +183,16 @@ class Question:
                     self.r_board[pos[1]].append(val)
                     self.c_board[pos[0]].append(val)
                     self.s_board[square(pos)].append(val)
+            if Solution(self.board).unique_solu() == -1:
+                start()
 
-        def start(lev):
+        def zero_cell(r, c):
+            self.board[r][c] = 0
+
+        def refill_cell(r, c):
+            self.board[r][c] = FINAL_BOARD[r][c]
+
+        def start():
             self.board = [[0, 0, 0, 0, 0, 0, 0, 0, 0],
                           [0, 0, 0, 0, 0, 0, 0, 0, 0],
                           [0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -200,11 +206,204 @@ class Question:
             self.c_board = [[], [], [], [], [], [], [], [], []]
             self.s_board = [[], [], [], [], [], [], [], [], []]
             self.selected_cells = []
-            select_cells(lev)
-            fill_cells()
+            select_random_cells()
+            fill_random_cells()
 
-        start(level)
+        def next_stage(lev):
+            pp = 0
+            while pp < 81 - lev:
+                x = random.randint(0, 8)
+                y = random.randint(0, 8)
+                if (x, y) not in self.selected_cells:
+                    self.selected_cells.append((x, y))
+                    zero_cell(x, y)
+                    if Solution(self.board).unique_solu():
+                        refill_cell(x, y)
+                        pp -= 1
+                    pp += 1
+
+
+        start()
+        Solution(self.board).find_1st_solu()
+        for i in self.board:
+            FINAL_BOARD.append(i.copy())
+        next_stage(level)
+
         return self.board
+
+
+class Solution:
+    def __init__(self, board):
+        self.board = board
+        self.r_board = [[], [], [], [], [], [], [], [], []]
+        self.c_board = [[], [], [], [], [], [], [], [], []]
+        self.s_board = [[], [], [], [], [], [], [], [], []]
+        self.empty_cells = []
+        self.posb_for_empty = {}
+        self.r_new = [[], [], [], [], [], [], [], [], []]
+        self.c_new = [[], [], [], [], [], [], [], [], []]
+        self.s_new = [[], [], [], [], [], [], [], [], []]
+        self.num = 0
+        self.tame = time.time()
+        self.initialize()
+
+    def square(self, r, c):
+        if r < 3:
+            if c < 3:
+                return 0
+            elif 2 < c < 6:
+                return 1
+            elif 5 < c < 9:
+                return 2
+        elif 2 < r < 6:
+            if c < 3:
+                return 3
+            elif 2 < c < 6:
+                return 4
+            elif 5 < c < 9:
+                return 5
+        elif 5 < r < 9:
+            if c < 3:
+                return 6
+            elif 2 < c < 6:
+                return 7
+            elif 5 < c < 9:
+                return 8
+
+    def fits(self, i, cell):
+        (r, c, s) = cell
+        if (i in self.r_board[c]) or (i in self.c_board[r]) or (i in self.s_board[s]):
+            return False
+        else:
+            return True
+
+    def possible_values(self, cell):
+        l = []
+        for i in range(1, 10):
+            if self.fits(i, cell):
+                l.append(i)
+        return l
+
+    def posb_in_pos(self, i, cell):
+        (r, c, s) = cell
+        if i not in self.r_new[c] and i not in self.c_new[r] and i not in self.s_new[s]:
+            return True
+        else:
+            return False
+
+    def fill_cell(self, i, cell):
+        (r, c, s) = cell
+        self.r_new[c].append(i)
+        self.c_new[r].append(i)
+        self.s_new[s].append(i)
+
+    def unfill_cell(self, cell):
+        (r, c, s) = cell
+        self.r_new[c].pop()
+        self.c_new[r].pop()
+        self.s_new[s].pop()
+
+    def initialize(self):
+        for r in range(len(self.board)):
+            for c in range(len(self.board[r])):
+                s = self.square(r, c)
+                if self.board[r][c] == 0:
+                    self.empty_cells.append((r, c, s))
+                else:
+                    self.r_board[c].append(self.board[r][c])
+                    self.c_board[r].append(self.board[r][c])
+                    self.s_board[s].append(self.board[r][c])
+
+        for cell in self.empty_cells:
+            self.posb_for_empty[cell] = self.possible_values(cell)
+
+    def print_board(self):
+        t_board = [[], [], [], [], [], [], [], [], []]
+        for r in range(len(self.board)):
+            j = 0
+            for c in range(len(self.board[r])):
+                if self.board[r][c] == 0:
+                    t_board[r].append(self.c_new[r][j])
+                    j += 1
+                else:
+                    t_board[r].append(self.board[r][c])
+        for i in t_board:
+            print(i)
+        print()
+
+    def fill_board(self):
+        for r in range(len(self.board)):
+            for c in range(len(self.board[r])):
+                if self.board[r][c] == 0:
+                    self.board[r][c] = self.c_new[r][0]
+                    self.c_new[r].pop(0)
+
+    def find_1st_solu(self):
+        def start(n):
+            if n == len(self.empty_cells):
+                return True
+            cell = self.empty_cells[n]
+            for i in self.posb_for_empty[cell]:
+                if self.posb_in_pos(i, cell):
+                    self.fill_cell(i, cell)
+                    if not start(n + 1):
+                        self.unfill_cell(cell)
+                    else:
+                        return True
+            else:
+                return False
+
+        if not start(0):
+            print("No solution!")
+            return False
+        else:
+            self.fill_board()
+            return True
+
+    def find_multiple_solu(self):
+        def start(n):
+            if n == len(self.empty_cells):
+                self.print_board()
+                return None
+            cell = self.empty_cells[n]
+            if time.time() - self.tame > 0.1:
+                return False
+            for i in self.posb_for_empty[cell]:
+                if self.posb_in_pos(i, cell):
+                    self.fill_cell(i, cell)
+                    start(n + 1)
+                    self.unfill_cell(cell)
+            else:
+                return False
+
+        if not start(0):
+            print("No solution")
+
+    def unique_solu(self):
+        def start(n):
+            if n == len(self.empty_cells):
+                self.num += 1
+                return None
+            cell = self.empty_cells[n]
+            if self.num > 1:
+                return True
+            if time.time() - self.tame > 0.1:
+                return False
+            for i in self.posb_for_empty[cell]:
+                if self.num > 1:
+                    return True
+                if self.posb_in_pos(i, cell):
+                    self.fill_cell(i, cell)
+                    start(n + 1)
+                    self.unfill_cell(cell)
+            else:
+                return False
+
+        if start(0): return 1
+        if self.num == 0:
+            return -1
+        else:
+            return 0
 
 
 class Clear(pygame.sprite.Sprite):
