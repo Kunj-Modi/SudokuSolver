@@ -1,8 +1,6 @@
 import random
 import time
 
-import pygame
-
 from constants import *
 
 screen = pygame.display.set_mode((609, 680))
@@ -88,41 +86,9 @@ class Cell(pygame.sprite.Sprite):
                         UNDO.append((self.r, self.c, self.val))
                     self.val = None
                     REDO.clear()
-                elif KEY_PRESSED == pygame.K_1:
+                elif 49 <= KEY_PRESSED <= 57:
                     UNDO.append((self.r, self.c, self.val))
-                    self.val = 1
-                    REDO.clear()
-                elif KEY_PRESSED == pygame.K_2:
-                    UNDO.append((self.r, self.c, self.val))
-                    self.val = 2
-                    REDO.clear()
-                elif KEY_PRESSED == pygame.K_3:
-                    UNDO.append((self.r, self.c, self.val))
-                    self.val = 3
-                    REDO.clear()
-                elif KEY_PRESSED == pygame.K_4:
-                    UNDO.append((self.r, self.c, self.val))
-                    self.val = 4
-                    REDO.clear()
-                elif KEY_PRESSED == pygame.K_5:
-                    UNDO.append((self.r, self.c, self.val))
-                    self.val = 5
-                    REDO.clear()
-                elif KEY_PRESSED == pygame.K_6:
-                    UNDO.append((self.r, self.c, self.val))
-                    self.val = 6
-                    REDO.clear()
-                elif KEY_PRESSED == pygame.K_7:
-                    UNDO.append((self.r, self.c, self.val))
-                    self.val = 7
-                    REDO.clear()
-                elif KEY_PRESSED == pygame.K_8:
-                    UNDO.append((self.r, self.c, self.val))
-                    self.val = 8
-                    REDO.clear()
-                elif KEY_PRESSED == pygame.K_9:
-                    UNDO.append((self.r, self.c, self.val))
-                    self.val = 9
+                    self.val = KEY_PRESSED - 48
                     REDO.clear()
                 if len(UNDO) > 7:
                     UNDO.pop(0)
