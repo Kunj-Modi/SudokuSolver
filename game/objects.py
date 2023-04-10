@@ -1,5 +1,8 @@
 import random
 import time
+
+import pygame
+
 from constants import *
 
 screen = pygame.display.set_mode((609, 680))
@@ -78,7 +81,9 @@ class Cell(pygame.sprite.Sprite):
         # Changing value in cell
         if self.mutable:
             if CLEAR or SELECTED_CELL == self.get_cords():
-                if KEY_PRESSED == pygame.K_0 or CLEAR:
+                if CLEAR:
+                    self.val = None
+                if KEY_PRESSED == pygame.K_0:
                     if self.val:
                         UNDO.append((self.r, self.c, self.val))
                     self.val = None
@@ -440,10 +445,12 @@ class Clear(pygame.sprite.Sprite):
         self.text_rect.center = self.rect.center
 
     def update(self):
-        global CLEAR, MOUSE_POS, MOUSE_DOWN
+        global CLEAR, MOUSE_POS, MOUSE_DOWN, UNDO, REDO
         pygame.draw.rect(screen, SC_BUTTON_COLLOR, self.rect, border_radius=3)
         screen.blit(self.text_surf, self.text_rect)
         if MOUSE_DOWN and self.rect.collidepoint(MOUSE_POS):
+            REDO.clear()
+            UNDO.clear()
             CLEAR = True
             MOUSE_DOWN = False
 
@@ -487,7 +494,7 @@ class UndoButton(pygame.sprite.Sprite):
         pygame.draw.rect(screen, DOUN_BUTTON_COLOR, self.rect, border_radius=3)
         screen.blit(self.text_surf, self.text_rect)
 
-        if MOUSE_DOWN and self.rect.collidepoint(MOUSE_POS):
+        if MOUSE_DOWN and self.rect.collidepoint(MOUSE_POS) and UNDO:
             UNDO_V = True
             MOUSE_DOWN = False
 
@@ -508,6 +515,6 @@ class RedoButton(pygame.sprite.Sprite):
         global REDO_V, MOUSE_DOWN
         pygame.draw.rect(screen, DOUN_BUTTON_COLOR, self.rect, border_radius=3)
         screen.blit(self.text_surf, self.text_rect)
-        if MOUSE_DOWN and self.rect.collidepoint(MOUSE_POS):
+        if MOUSE_DOWN and self.rect.collidepoint(MOUSE_POS) and REDO:
             REDO_V = True
             MOUSE_DOWN = False
