@@ -29,6 +29,13 @@ def square(r, c):
             return 8
 
 
+def updateConstants(update, position, key_pressed):
+    global MOUSE_DOWN, MOUSE_POS, KEY_PRESSED
+    MOUSE_DOWN = update
+    MOUSE_POS = position
+    KEY_PRESSED = key_pressed
+
+
 class Cell(pygame.sprite.Sprite):
     def __init__(self, row, column, value=None, mutability=True):
         super().__init__()
@@ -44,11 +51,12 @@ class Cell(pygame.sprite.Sprite):
         self.rect.center = (self.x, self.y)
 
     def get_cords(self):
-        return self.r, self.c, self.s
+        return self.r, self.c
 
-    def update(self, mouse_down):
-        global SELECTED_CELL
+    def update(self):
+        global SELECTED_CELL, UNDO_V, REDO_V, MOUSE_DOWN, MOUSE_POS
 
+        # Cell and font color for cell
         color = CELL_COLOR
         if not self.mutable:
             color = QUESTION_COLOR
@@ -58,39 +66,77 @@ class Cell(pygame.sprite.Sprite):
             color = SELECTED_CELL_COLOR
         elif (not self.mutable) and (self.r == SELECTED_CELL[0] or self.c == SELECTED_CELL[1] or self.s == square(SELECTED_CELL[0], SELECTED_CELL[1])):
             color = SEL_QUES_RCS_COLOR
-        elif self.r == SELECTED_CELL[0] or self.c == SELECTED_CELL[1] or self.s == square(SELECTED_CELL[0], SELECTED_CELL[1]):
+        elif self.mutable and (self.r == SELECTED_CELL[0] or self.c == SELECTED_CELL[1] or self.s == square(SELECTED_CELL[0], SELECTED_CELL[1])):
             color = SEL_CELL_RCS_COLOR
         pygame.draw.rect(screen, color, self.rect, border_radius=3)
-        keys = pygame.key.get_pressed()
-        mouse_pos = pygame.mouse.get_pos()
 
-        if mouse_down and self.rect.collidepoint(mouse_pos):
+        # Selecting Cell
+        if MOUSE_DOWN and self.rect.collidepoint(MOUSE_POS):
             SELECTED_CELL = self.get_cords()
+            MOUSE_DOWN = False
 
+        # Changing value in cell
         if self.mutable:
             if CLEAR or SELECTED_CELL == self.get_cords():
-                if keys[pygame.K_0] or CLEAR:
+                if KEY_PRESSED == pygame.K_0 or CLEAR:
+                    if self.val:
+                        UNDO.append((self.r, self.c, self.val))
                     self.val = None
-                elif keys[pygame.K_1]:
+                    REDO.clear()
+                elif KEY_PRESSED == pygame.K_1:
+                    UNDO.append((self.r, self.c, self.val))
                     self.val = 1
-                elif keys[pygame.K_2]:
+                    REDO.clear()
+                elif KEY_PRESSED == pygame.K_2:
+                    UNDO.append((self.r, self.c, self.val))
                     self.val = 2
-                elif keys[pygame.K_3]:
+                    REDO.clear()
+                elif KEY_PRESSED == pygame.K_3:
+                    UNDO.append((self.r, self.c, self.val))
                     self.val = 3
-                elif keys[pygame.K_4]:
+                    REDO.clear()
+                elif KEY_PRESSED == pygame.K_4:
+                    UNDO.append((self.r, self.c, self.val))
                     self.val = 4
-                elif keys[pygame.K_5]:
+                    REDO.clear()
+                elif KEY_PRESSED == pygame.K_5:
+                    UNDO.append((self.r, self.c, self.val))
                     self.val = 5
-                elif keys[pygame.K_6]:
+                    REDO.clear()
+                elif KEY_PRESSED == pygame.K_6:
+                    UNDO.append((self.r, self.c, self.val))
                     self.val = 6
-                elif keys[pygame.K_7]:
+                    REDO.clear()
+                elif KEY_PRESSED == pygame.K_7:
+                    UNDO.append((self.r, self.c, self.val))
                     self.val = 7
-                elif keys[pygame.K_8]:
+                    REDO.clear()
+                elif KEY_PRESSED == pygame.K_8:
+                    UNDO.append((self.r, self.c, self.val))
                     self.val = 8
-                elif keys[pygame.K_9]:
+                    REDO.clear()
+                elif KEY_PRESSED == pygame.K_9:
+                    UNDO.append((self.r, self.c, self.val))
                     self.val = 9
+                    REDO.clear()
+                if len(UNDO) > 7:
+                    UNDO.pop(0)
+
+        if UNDO_V and UNDO and UNDO[-1][:2] == self.get_cords():
+            REDO.append((self.r, self.c, self.val))
+            self.val = UNDO[-1][2]
+            UNDO.pop()
+            UNDO_V = False
+        if REDO_V and REDO and REDO[-1][:2] == self.get_cords():
+            UNDO.append((self.r, self.c, self.val))
+            self.val = REDO[-1][2]
+            REDO.pop()
+            REDO_V = False
+
         if SOLVE:
             self.val = FINAL_BOARD[self.r][self.c]
+
+        # Display cell
         if self.val:
             if not self.mutable:
                 val_surface = NUM_FONT.render(f"{self.val}", True, QUES_FONT_COLOR)
@@ -127,11 +173,11 @@ class Board(pygame.sprite.Sprite):
                     self.columns[r].append(cell)
                     self.squares[cell.s].append(cell)
 
-    def update(self, mouse_down):
+    def update(self):
         global CLEAR
         for r in range(9):
             for c in range(9):
-                self.board[r][c].update(mouse_down)
+                self.board[r][c].update()
         CLEAR = False
 
 
@@ -393,13 +439,13 @@ class Clear(pygame.sprite.Sprite):
         self.text_rect = self.text_surf.get_rect()
         self.text_rect.center = self.rect.center
 
-    def update(self, mouse_down):
-        global CLEAR
+    def update(self):
+        global CLEAR, MOUSE_POS, MOUSE_DOWN
         pygame.draw.rect(screen, SC_BUTTON_COLLOR, self.rect, border_radius=3)
         screen.blit(self.text_surf, self.text_rect)
-        mouse_pos = pygame.mouse.get_pos()
-        if mouse_down and self.rect.collidepoint(mouse_pos):
+        if MOUSE_DOWN and self.rect.collidepoint(MOUSE_POS):
             CLEAR = True
+            MOUSE_DOWN = False
 
 
 class Solve(pygame.sprite.Sprite):
@@ -414,13 +460,14 @@ class Solve(pygame.sprite.Sprite):
         self.text_rect = self.text_surf.get_rect()
         self.text_rect.center = self.rect.center
 
-    def update(self, mouse_down):
-        global SOLVE
+    def update(self):
+        global SOLVE, MOUSE_DOWN
         pygame.draw.rect(screen, SC_BUTTON_COLLOR, self.rect, border_radius=3)
         screen.blit(self.text_surf, self.text_rect)
-        mouse_pos = pygame.mouse.get_pos()
-        if mouse_down and self.rect.collidepoint(mouse_pos):
+        if MOUSE_DOWN and self.rect.collidepoint(MOUSE_POS):
             SOLVE = True
+            MOUSE_DOWN = False
+
 
 class UndoButton(pygame.sprite.Sprite):
     def __init__(self):
@@ -434,13 +481,15 @@ class UndoButton(pygame.sprite.Sprite):
         self.text_rect = self.text_surf.get_rect()
         self.text_rect.center = self.rect.center
 
-    def update(self, mouse_down):
-        global UNDO_V
+    def update(self):
+        global UNDO_V, MOUSE_DOWN
+
         pygame.draw.rect(screen, DOUN_BUTTON_COLOR, self.rect, border_radius=3)
         screen.blit(self.text_surf, self.text_rect)
-        mouse_pos = pygame.mouse.get_pos()
-        if mouse_down and self.rect.collidepoint(mouse_pos):
+
+        if MOUSE_DOWN and self.rect.collidepoint(MOUSE_POS):
             UNDO_V = True
+            MOUSE_DOWN = False
 
 
 class RedoButton(pygame.sprite.Sprite):
@@ -455,10 +504,10 @@ class RedoButton(pygame.sprite.Sprite):
         self.text_rect = self.text_surf.get_rect()
         self.text_rect.center = self.rect.center
 
-    def update(self, mouse_down):
-        global REDO_V
+    def update(self):
+        global REDO_V, MOUSE_DOWN
         pygame.draw.rect(screen, DOUN_BUTTON_COLOR, self.rect, border_radius=3)
         screen.blit(self.text_surf, self.text_rect)
-        mouse_pos = pygame.mouse.get_pos()
-        if mouse_down and self.rect.collidepoint(mouse_pos):
+        if MOUSE_DOWN and self.rect.collidepoint(MOUSE_POS):
             REDO_V = True
+            MOUSE_DOWN = False

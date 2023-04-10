@@ -20,6 +20,10 @@ REDO = []
 CLEAR = False
 SOLVE = False
 
+MOUSE_DOWN = False
+MOUSE_POS = (0, 0)
+KEY_PRESSED = 0
+
 BACKGROUND_COLOR = "black"
 CELL_COLOR = "#c0e8ec"
 SELECTED_CELL_COLOR = "white"
