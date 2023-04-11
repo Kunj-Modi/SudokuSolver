@@ -1,6 +1,9 @@
 from objects import *
 
 pygame.init()
+mouse_down = False
+mouse_pos = (0, 0)
+key = 0
 
 screen.fill(BACKGROUND_COLOR)
 pygame.display.set_caption("Sudoku")
@@ -22,6 +25,15 @@ while True:
             pygame.quit()
             exit()
 
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            mouse_down = True
+            mouse_pos = pygame.mouse.get_pos()
+
+        if event.type == pygame.KEYDOWN:
+            key = event.key
+
+    updateConstants(mouse_down, mouse_pos, key)
+
     clear.update()
     solve.update()
     undo.update()
@@ -29,4 +41,7 @@ while True:
     board.update()
 
     pygame.display.update()
+    mouse_down = False
+    mouse_pos = (0, 0)
+    key = 0
     clock.tick(60)
