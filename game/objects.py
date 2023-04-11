@@ -79,7 +79,7 @@ class Cell(pygame.sprite.Sprite):
         # Changing value in cell
         if self.mutable:
             if CLEAR or SELECTED_CELL == self.get_cords():
-                if CLEAR:
+                if CLEAR and not SOLVE:
                     if self.val:
                         ROWS_FILLED[self.r].remove(self.val)
                         COLUMNS_FILLED[self.c].remove(self.val)
