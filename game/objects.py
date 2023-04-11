@@ -55,7 +55,7 @@ class Cell(pygame.sprite.Sprite):
         return self.r, self.c
 
     def update(self):
-        global SELECTED_CELL, UNDO_V, REDO_V, MOUSE_DOWN, MOUSE_POS
+        global SELECTED_CELL, UNDO_V, REDO_V, MOUSE_DOWN, MOUSE_POS, ROWS_FILLED, COLUMNS_FILLED, SQUARES_FILLED
 
         # Cell and font color for cell
         color = CELL_COLOR
@@ -80,15 +80,29 @@ class Cell(pygame.sprite.Sprite):
         if self.mutable:
             if CLEAR or SELECTED_CELL == self.get_cords():
                 if CLEAR:
+                    if self.val:
+                        ROWS_FILLED[self.r].remove(self.val)
+                        COLUMNS_FILLED[self.c].remove(self.val)
+                        SQUARES_FILLED[self.s].remove(self.val)
                     self.val = None
                 if KEY_PRESSED == pygame.K_0:
                     if self.val:
+                        ROWS_FILLED[self.r].remove(self.val)
+                        COLUMNS_FILLED[self.c].remove(self.val)
+                        SQUARES_FILLED[self.s].remove(self.val)
                         UNDO.append((self.r, self.c, self.val))
                     self.val = None
                     REDO.clear()
                 elif 49 <= KEY_PRESSED <= 57:
+                    if self.val:
+                        ROWS_FILLED[self.r].remove(self.val)
+                        COLUMNS_FILLED[self.c].remove(self.val)
+                        SQUARES_FILLED[self.s].remove(self.val)
                     UNDO.append((self.r, self.c, self.val))
                     self.val = KEY_PRESSED - 48
+                    ROWS_FILLED[self.r].append(self.val)
+                    COLUMNS_FILLED[self.c].append(self.val)
+                    SQUARES_FILLED[self.s].append(self.val)
                     REDO.clear()
                 if len(UNDO) > 7:
                     UNDO.pop(0)
@@ -109,40 +123,62 @@ class Cell(pygame.sprite.Sprite):
 
         # Display cell
         if self.val:
+            try:
+                ROWS_FILLED[self.r].remove(self.val)
+                rr = True
+            except:
+                rr = False
+            try:
+                COLUMNS_FILLED[self.c].remove(self.val)
+                cc = True
+            except:
+                cc = False
+            try:
+                SQUARES_FILLED[self.s].remove(self.val)
+                ss = True
+            except:
+                ss = False
+
             if not self.mutable:
                 val_surface = NUM_FONT.render(f"{self.val}", True, QUES_FONT_COLOR)
+            elif self.val in ROWS_QUES[self.r]+ROWS_FILLED[self.r]\
+                    or self.val in COLUMNS_QUES[self.c]+COLUMNS_FILLED[self.c] \
+                    or self.val in SQUARES_QUES[self.s]+SQUARES_FILLED[self.s]:
+                val_surface = NUM_FONT.render(f"{self.val}", True, WRONG_FONT_COLOR)
             else:
                 val_surface = NUM_FONT.render(f"{self.val}", True, TEXT_COLOR)
             val_rect = val_surface.get_rect()
             val_rect.center = self.rect.center
             screen.blit(val_surface, val_rect)
 
+            if rr:
+                ROWS_FILLED[self.r].append(self.val)
+            if cc:
+                COLUMNS_FILLED[self.c].append(self.val)
+            if ss:
+                SQUARES_FILLED[self.s].append(self.val)
+
 
 class Board(pygame.sprite.Sprite):
     def __init__(self, int_board):
         super().__init__()
         self.board = [[], [], [], [], [], [], [], [], []]
-        self.rows = [[], [], [], [], [], [], [], [], []]
-        self.columns = [[], [], [], [], [], [], [], [], []]
-        self.squares = [[], [], [], [], [], [], [], [], []]
         self.int_board = int_board
         self.fill_board()
 
     def fill_board(self):
+        global ROWS_QUES, COLUMNS_QUES, SQUARES_QUES
         for r in range(9):
             for c in range(9):
                 if self.int_board[r][c]:
                     cell = Cell(row=r, column=c, value=self.int_board[r][c], mutability=False)
                     self.board[r].append(cell)
-                    self.rows[c].append(cell)
-                    self.columns[r].append(cell)
-                    self.squares[cell.s].append(cell)
+                    ROWS_QUES[r].append(cell.val)
+                    COLUMNS_QUES[c].append(cell.val)
+                    SQUARES_QUES[square(r, c)].append(cell.val)
                 else:
                     cell = Cell(r, c)
                     self.board[r].append(cell)
-                    self.rows[c].append(cell)
-                    self.columns[r].append(cell)
-                    self.squares[cell.s].append(cell)
 
     def update(self):
         global CLEAR

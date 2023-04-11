@@ -11,6 +11,12 @@ BLANK_INT_BOARD = [[0, 0, 0, 0, 0, 0, 0, 0, 0],
                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
                    [0, 0, 0, 0, 0, 0, 0, 0, 0],
                    [0, 0, 0, 0, 0, 0, 0, 0, 0]]
+ROWS_FILLED = [[], [], [], [], [], [], [], [], []]
+COLUMNS_FILLED = [[], [], [], [], [], [], [], [], []]
+SQUARES_FILLED = [[], [], [], [], [], [], [], [], []]
+ROWS_QUES = [[], [], [], [], [], [], [], [], []]
+COLUMNS_QUES = [[], [], [], [], [], [], [], [], []]
+SQUARES_QUES = [[], [], [], [], [], [], [], [], []]
 FINAL_BOARD = []
 SELECTED_CELL = (0, 0)
 UNDO_V = False
@@ -35,5 +41,6 @@ SC_BUTTON_COLLOR = "#fff4c0"
 DOUN_BUTTON_COLOR = "#fff8c0"
 TEXT_COLOR = (64, 64, 64)
 QUES_FONT_COLOR = "black"
+WRONG_FONT_COLOR = "red"
 NUM_FONT = pygame.font.Font(None, 60)
 TEXT_FONT = pygame.font.Font(None, 50)
