@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+table {
+  font-family: arial, sans-serif;
+  border-collapse: collapse;
+  width: 320px;
+}
+
+td{
+  border: 1px solid;
+  text-align: center;
+  padding: 8px;
+}
+</style>
+</head>
+<body>
+
+<h2>Sudoku</h2>
+
+<table>
+    {% for i in num.board %}
+        <tr>
+            {% for j in i %}
+                {% if j.val %}
+                    <td style="background-color:{{j.color}};">{{ j.val }}</td>
+                {% else %}
+                    <td style="background-color:{{j.color}};"></td>
+                {% endif %}
+            {% endfor %}
+        </tr>
+    {% endfor %}
+</table>
+
+</body>
+</html>
