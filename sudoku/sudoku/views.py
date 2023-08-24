@@ -4,7 +4,8 @@ from .objects import *
 
 def index(request):
     q_board = Question().question(35)
-    nums = Board(q_board)
+    s_board = FINAL_BOARD
+    nums = list(range(10))
     template = loader.get_template('index.html')
-    context = {'num':nums,}
+    context = {"nums": nums, "puzzle": q_board, "solution": s_board}
     return HttpResponse(template.render(context, request))

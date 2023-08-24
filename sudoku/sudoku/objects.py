@@ -1,7 +1,6 @@
 import random
 import time
 
-from .constants import *
 
 def square(r, c):
     if r < 3:
@@ -27,139 +26,8 @@ def square(r, c):
             return 8
 
 
-def updateConstants(update, position, key_pressed):
-    global MOUSE_DOWN, MOUSE_POS, KEY_PRESSED
-    MOUSE_DOWN = update
-    MOUSE_POS = position
-    KEY_PRESSED = key_pressed
-
-
-class Cell:
-    def __init__(self, row, column, value=None, mutability=True):
-        super().__init__()
-        self.r = row
-        self.c = column
-        self.s = square(row, column)
-        self.color = "#c0e8ec"
-        self.val = value
-        self.mutable = mutability
-
-    def get_cords(self):
-        return self.r, self.c
-
-    def update(self):
-        global SELECTED_CELL, UNDO_V, REDO_V, MOUSE_DOWN, MOUSE_POS, ROWS_FILLED, COLUMNS_FILLED, SQUARES_FILLED
-
-        # Cell and font color for cell
-        self.color = CELL_COLOR
-        if not self.mutable:
-            self.color = QUESTION_COLOR
-        if (not self.mutable) and (SELECTED_CELL == self.get_cords()):
-            self.color = SELECTED_QUES_COLOR
-        elif SELECTED_CELL == self.get_cords():
-            self.color = SELECTED_CELL_COLOR
-        elif (not self.mutable) and (self.r == SELECTED_CELL[0] or self.c == SELECTED_CELL[1] or self.s == square(SELECTED_CELL[0], SELECTED_CELL[1])):
-            self.color = SEL_QUES_RCS_COLOR
-        elif self.mutable and (self.r == SELECTED_CELL[0] or self.c == SELECTED_CELL[1] or self.s == square(SELECTED_CELL[0], SELECTED_CELL[1])):
-            self.color = SEL_CELL_RCS_COLOR
-
-        # Changing value in cell
-        if self.mutable:
-            if CLEAR or SELECTED_CELL == self.get_cords():
-                if CLEAR and not SOLVE:
-                    if self.val:
-                        ROWS_FILLED[self.r].remove(self.val)
-                        COLUMNS_FILLED[self.c].remove(self.val)
-                        SQUARES_FILLED[self.s].remove(self.val)
-                    self.val = None
-                if KEY_PRESSED == 48:
-                    if self.val:
-                        ROWS_FILLED[self.r].remove(self.val)
-                        COLUMNS_FILLED[self.c].remove(self.val)
-                        SQUARES_FILLED[self.s].remove(self.val)
-                        UNDO.append((self.r, self.c, self.val))
-                    self.val = None
-                    REDO.clear()
-                elif 49 <= KEY_PRESSED <= 57:
-                    if self.val:
-                        ROWS_FILLED[self.r].remove(self.val)
-                        COLUMNS_FILLED[self.c].remove(self.val)
-                        SQUARES_FILLED[self.s].remove(self.val)
-                    UNDO.append((self.r, self.c, self.val))
-                    self.val = KEY_PRESSED - 48
-                    ROWS_FILLED[self.r].append(self.val)
-                    COLUMNS_FILLED[self.c].append(self.val)
-                    SQUARES_FILLED[self.s].append(self.val)
-                    REDO.clear()
-                if len(UNDO) > 7:
-                    UNDO.pop(0)
-
-        if UNDO_V and UNDO and UNDO[-1][:2] == self.get_cords():
-            REDO.append((self.r, self.c, self.val))
-            self.val = UNDO[-1][2]
-            UNDO.pop()
-            UNDO_V = False
-        if REDO_V and REDO and REDO[-1][:2] == self.get_cords():
-            UNDO.append((self.r, self.c, self.val))
-            self.val = REDO[-1][2]
-            REDO.pop()
-            REDO_V = False
-
-        if SOLVE:
-            self.val = FINAL_BOARD[self.r][self.c]
-
-        # Display cell
-        if self.val:
-            try:
-                ROWS_FILLED[self.r].remove(self.val)
-                rr = True
-            except:
-                rr = False
-            try:
-                COLUMNS_FILLED[self.c].remove(self.val)
-                cc = True
-            except:
-                cc = False
-            try:
-                SQUARES_FILLED[self.s].remove(self.val)
-                ss = True
-            except:
-                ss = False
-
-            if rr:
-                ROWS_FILLED[self.r].append(self.val)
-            if cc:
-                COLUMNS_FILLED[self.c].append(self.val)
-            if ss:
-                SQUARES_FILLED[self.s].append(self.val)
-
-
-class Board():
-    def __init__(self, int_board):
-        self.board = [[], [], [], [], [], [], [], [], []]
-        self.int_board = int_board
-        self.fill_board()
-
-    def fill_board(self):
-        global ROWS_QUES, COLUMNS_QUES, SQUARES_QUES
-        for r in range(9):
-            for c in range(9):
-                if self.int_board[r][c]:
-                    cell = Cell(row=r, column=c, value=self.int_board[r][c], mutability=False)
-                    self.board[r].append(cell)
-                    ROWS_QUES[r].append(cell.val)
-                    COLUMNS_QUES[c].append(cell.val)
-                    SQUARES_QUES[square(r, c)].append(cell.val)
-                else:
-                    cell = Cell(r, c)
-                    self.board[r].append(cell)
-
-    def update(self):
-        global CLEAR
-        for r in range(9):
-            for c in range(9):
-                self.board[r][c].update()
-        CLEAR = False
+FINAL_BOARD = []
+SQUARES = {(0, 0): 0, (0, 1): 0, (0, 2): 0, (0, 3): 1, (0, 4): 1, (0, 5): 1, (0, 6): 2, (0, 7): 2, (0, 8): 2, (1, 0): 0, (1, 1): 0, (1, 2): 0, (1, 3): 1, (1, 4): 1, (1, 5): 1, (1, 6): 2, (1, 7): 2, (1, 8): 2, (2, 0): 0, (2, 1): 0, (2, 2): 0, (2, 3): 1, (2, 4): 1, (2, 5): 1, (2, 6): 2, (2, 7): 2, (2, 8): 2, (3, 0): 3, (3, 1): 3, (3, 2): 3, (3, 3): 4, (3, 4): 4, (3, 5): 4, (3, 6): 5, (3, 7): 5, (3, 8): 5, (4, 0): 3, (4, 1): 3, (4, 2): 3, (4, 3): 4, (4, 4): 4, (4, 5): 4, (4, 6): 5, (4, 7): 5, (4, 8): 5, (5, 0): 3, (5, 1): 3, (5, 2): 3, (5, 3): 4, (5, 4): 4, (5, 5): 4, (5, 6): 5, (5, 7): 5, (5, 8): 5, (6, 0): 6, (6, 1): 6, (6, 2): 6, (6, 3): 7, (6, 4): 7, (6, 5): 7, (6, 6): 8, (6, 7): 8, (6, 8): 8, (7, 0): 6, (7, 1): 6, (7, 2): 6, (7, 3): 7, (7, 4): 7, (7, 5): 7, (7, 6): 8, (7, 7): 8, (7, 8): 8, (8, 0): 6, (8, 1): 6, (8, 2): 6, (8, 3): 7, (8, 4): 7, (8, 5): 7, (8, 6): 8, (8, 7): 8, (8, 8): 8}
 
 
 class Question:
@@ -319,20 +187,6 @@ class Solution:
         for cell in self.empty_cells:
             self.posb_for_empty[cell] = self.possible_values(cell)
 
-    def print_board(self):
-        t_board = [[], [], [], [], [], [], [], [], []]
-        for r in range(len(self.board)):
-            j = 0
-            for c in range(len(self.board[r])):
-                if self.board[r][c] == 0:
-                    t_board[r].append(self.c_new[r][j])
-                    j += 1
-                else:
-                    t_board[r].append(self.board[r][c])
-        for i in t_board:
-            print(i)
-        print()
-
     def fill_board(self):
         for r in range(len(self.board)):
             for c in range(len(self.board[r])):
@@ -362,25 +216,6 @@ class Solution:
             self.fill_board()
             return True
 
-    def find_multiple_solu(self):
-        def start(n):
-            if n == len(self.empty_cells):
-                self.print_board()
-                return None
-            cell = self.empty_cells[n]
-            if time.time() - self.tame > 0.1:
-                return False
-            for i in self.posb_for_empty[cell]:
-                if self.posb_in_pos(i, cell):
-                    self.fill_cell(i, cell)
-                    start(n + 1)
-                    self.unfill_cell(cell)
-            else:
-                return False
-
-        if not start(0):
-            print("No solution")
-
     def unique_solu(self):
         def start(n):
             if n == len(self.empty_cells):
@@ -406,87 +241,3 @@ class Solution:
             return -1
         else:
             return 0
-
-
-class Clear:
-    def __init__(self):
-        self.x = 142
-        self.y = 608
-        self.h = 60
-        self.ln = 157
-        self.rect = pygame.rect.Rect(self.x, self.y, self.ln, self.h)
-        self.text_surf = TEXT_FONT.render("CLEAR", True, QUES_FONT_COLOR)
-        self.text_rect = self.text_surf.get_rect()
-        self.text_rect.center = self.rect.center
-
-    def update(self):
-        global CLEAR, MOUSE_POS, MOUSE_DOWN, UNDO, REDO
-        pygame.draw.rect(screen, SC_BUTTON_COLLOR, self.rect, border_radius=3)
-        screen.blit(self.text_surf, self.text_rect)
-        if MOUSE_DOWN and self.rect.collidepoint(MOUSE_POS):
-            REDO.clear()
-            UNDO.clear()
-            CLEAR = True
-            MOUSE_DOWN = False
-
-
-class Solve:
-    def __init__(self):
-        self.x = 306
-        self.y = 608
-        self.h = 60
-        self.ln = 159
-        self.rect = pygame.rect.Rect(self.x, self.y, self.ln, self.h)
-        self.text_surf = TEXT_FONT.render("SOLVE", True, QUES_FONT_COLOR)
-        self.text_rect = self.text_surf.get_rect()
-        self.text_rect.center = self.rect.center
-
-    def update(self):
-        global SOLVE, MOUSE_DOWN
-        pygame.draw.rect(screen, SC_BUTTON_COLLOR, self.rect, border_radius=3)
-        screen.blit(self.text_surf, self.text_rect)
-        if MOUSE_DOWN and self.rect.collidepoint(MOUSE_POS):
-            SOLVE = True
-            MOUSE_DOWN = False
-
-
-class UndoButton:
-    def __init__(self):
-        self.x = 12
-        self.y = 608
-        self.h = 60
-        self.ln = 123
-        self.rect = pygame.rect.Rect(self.x, self.y, self.ln, self.h)
-        self.text_surf = TEXT_FONT.render("<", True, QUES_FONT_COLOR)
-        self.text_rect = self.text_surf.get_rect()
-        self.text_rect.center = self.rect.center
-
-    def update(self):
-        global UNDO_V, MOUSE_DOWN
-
-        pygame.draw.rect(screen, DOUN_BUTTON_COLOR, self.rect, border_radius=3)
-        screen.blit(self.text_surf, self.text_rect)
-
-        if MOUSE_DOWN and self.rect.collidepoint(MOUSE_POS) and UNDO:
-            UNDO_V = True
-            MOUSE_DOWN = False
-
-
-class RedoButton:
-    def __init__(self):
-        self.x = 472
-        self.y = 608
-        self.h = 60
-        self.ln = 123
-        self.rect = pygame.rect.Rect(self.x, self.y, self.ln, self.h)
-        self.text_surf = TEXT_FONT.render(">", True, QUES_FONT_COLOR)
-        self.text_rect = self.text_surf.get_rect()
-        self.text_rect.center = self.rect.center
-
-    def update(self):
-        global REDO_V, MOUSE_DOWN
-        pygame.draw.rect(screen, DOUN_BUTTON_COLOR, self.rect, border_radius=3)
-        screen.blit(self.text_surf, self.text_rect)
-        if MOUSE_DOWN and self.rect.collidepoint(MOUSE_POS) and REDO:
-            REDO_V = True
-            MOUSE_DOWN = False

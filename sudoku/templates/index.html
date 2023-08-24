@@ -1,37 +1,58 @@
 <!DOCTYPE html>
 <html>
 <head>
-<style>
-table {
-  font-family: arial, sans-serif;
-  border-collapse: collapse;
-  width: 320px;
-}
+    <style>
+        table {
+          font-family: arial, sans-serif;
+          border-collapse: collapse;
+          width: 340px;
+          height: 340px;
+        }
 
-td{
-  border: 1px solid;
-  text-align: center;
-  padding: 8px;
-}
-</style>
+        td {
+          border: 1px solid;
+          text-align: center;
+          padding: 8px;
+        }
+
+        button {
+          width: 100%;
+          height: 100%;
+          border: none;
+          text-align: center;
+          font-size: inherit;
+          background-color: transparent;
+          padding: 0px;
+        }
+    </style>
+
+    <script type="text/javascript">
+        let solution = {{ solution }};
+
+        function buttonClicked()
+        {
+            console.log("WELLDONE");
+        }
+    </script>
 </head>
+
 <body>
+    <h2>Sudoku</h2>
 
-<h2>Sudoku</h2>
-
-<table>
-    {% for i in num.board %}
-        <tr>
-            {% for j in i %}
-                {% if j.val %}
-                    <td style="background-color:{{j.color}};">{{ j.val }}</td>
-                {% else %}
-                    <td style="background-color:{{j.color}};"></td>
-                {% endif %}
-            {% endfor %}
-        </tr>
-    {% endfor %}
-</table>
-
+    <table>
+        {% for i in puzzle %}
+            <tr>
+                {% for j in i %}
+                    <td style="background-color:#c0e8ec;">
+                        {% if j == 0 %}
+                            <button onclick="buttonClicked()">{{ j }}</button>
+                        {% else %}
+                            <button>{{ j }}</button>
+                        {% endif %}
+                    </td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+    </table>
 </body>
 </html>
